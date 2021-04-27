@@ -161,12 +161,10 @@ def printModels():
     print("|SVM| -Support Vector Classification")
     
 def addToDataset(averageRow):
-    print("addToDataset used")
     with open('league_dataset.csv',mode='a') as LD:
         writer = csv.writer(LD)
         writer.writerow(averageRow)
         LD.close()
-        print("ard ran")
 
 async def getAverage(connection,summoner):
     matchListHeader = await connection.request('get', '/lol-match-history/v1/products/lol/'+summoner+'/matches')
