@@ -336,9 +336,9 @@ async def getEndGame(connection):
                     wrongGuess +=1
             print("LOG",log)
             addToDataset(log)
-        writeGuesses()
+            writeGuesses()
         else:
-           print("not a regular game: ",endInfo['gameMode'])
+            print("not a regular game: ",endInfo['gameMode'])
             print("not added to database and not guess checked")
 
 
