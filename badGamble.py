@@ -322,9 +322,7 @@ async def getEndGame(connection):
         if endInfo['teams'][currentTeam]['isWinningTeam']:
             win = 1
         global currentRow
-        print("current",currentRow)
         log = currentRow.copy()
-        print("LOG",log)
         log.append(win)
         if endInfo['gameMode'] == 'CLASSIC':
             if getDatabase().size > 0:
@@ -334,7 +332,6 @@ async def getEndGame(connection):
                 else:
                     print("Well you proved me wrong(incorrect guess)")
                     wrongGuess +=1
-            print("LOG",log)
             addToDataset(log)
             writeGuesses()
         else:
