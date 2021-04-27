@@ -326,20 +326,20 @@ async def getEndGame(connection):
         log = currentRow.copy()
         print("LOG",log)
         log.append(win)
-        #if endInfo['gameMode'] == 'CLASSIC':
-        if getDatabase().size > 0:
-            if lastguess == win:
-                print("I told you so(correct guess)")
-                rightGuess +=1
-            else:
-                print("Well you proved me wrong(incorrect guess)")
-                wrongGuess +=1
-        print("LOG",log)
-        addToDataset(log)
+        if endInfo['gameMode'] == 'CLASSIC':
+            if getDatabase().size > 0:
+                if lastguess == win:
+                    print("I told you so(correct guess)")
+                    rightGuess +=1
+                else:
+                    print("Well you proved me wrong(incorrect guess)")
+                    wrongGuess +=1
+            print("LOG",log)
+            addToDataset(log)
         writeGuesses()
-        #else:
-        #   print("not a regular game: ",endInfo['gameMode'])
-        #    print("not added to database and not guess checked")
+        else:
+           print("not a regular game: ",endInfo['gameMode'])
+            print("not added to database and not guess checked")
 
 
 def printIntro():
