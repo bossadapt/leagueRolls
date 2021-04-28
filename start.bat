@@ -1,4 +1,4 @@
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python -m ensurepip
 python -m pip install sklearn
 python -m pip install pandas
 python -m pip install lcu-driver
