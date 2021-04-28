@@ -339,6 +339,10 @@ def importDataset():
                 if combinedList.count(row) == 0:
                     newAdditions +=1
                     combinedList.append(row)
+        with open(path+'league_dataset.csv',mode='w') as LD:
+                csvWriter = csv.writer(LD)
+                for row in combinedList:
+                    csvWriter.writerow(row)
         print("Import Complete: "+str(newAdditions)+" new addition(s)")
     except Exception as e:
         print("error well importing: " + str(e))
