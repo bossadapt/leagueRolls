@@ -5,4 +5,4 @@ python -m pip install lcu-driver
 python -m pip install matplotlib
 python -m pip install numpy
 python -m pip install scipy
-badGamble.py
+python badGamble.py
