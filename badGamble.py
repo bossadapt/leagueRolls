@@ -10,7 +10,6 @@
 
 #optionals
 #make it more accesable
-#add more variables for database
 #give the code jesus
 
 
@@ -32,12 +31,16 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+import getpass
+import os
 currentRow = [0,0,0,0,0]
 #globals
 rightGuess = 0
 wrongGuess = 0
 connector = Connector()
+path = ""
 model = "LR"
+USER_NAME = getpass.getuser()
 connected = False
 lastGuess = "No guess made yet"
 lastTimeSelect = False
@@ -45,13 +48,39 @@ lastTimeSelect2 = False
 lastTimeSelect3 = False
 lastTimeSelect4 = False
 lastTimeSelect5 = False
+def firstStart():
+    setPath()
+    fixBat()      
+def setPath():
+    global path
+    path = os.path.dirname(os.path.realpath(__file__))+"\\"
+def fixBat():
+    global path
+    #gets rid of installs 
+    bat_path = path+"\\start.bat"
+    py_path = path+"\\badGamble.py"
+    with open(bat_path,"w+") as bat:
+        bat.write("python "+py_path)    
+def addToStartup():
+    global path
+    file_path = path+"start.bat"
+    test = r'C:\Users\\'+ USER_NAME +"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\startLeagueRoll.bat"
+    if os.path.exists(test) != True:
+        bat_path = r'C:\Users\\'+ USER_NAME +"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+        with open(bat_path + '\\' + "startLeagueRoll.bat", "w+") as bat_file:
+            bat_file.write(r'cd '+os.path.dirname(os.path.realpath(__file__)))
+            bat_file.write("\n"+r'start "New Window" cmd /c %s' % file_path)
+        print("Successfully added to startup")
+    else:
+        print("Already added to startup")
+    writeSettings()
 def datasetWipe():
-    with open('league_dataset.csv',mode='w+') as ded:
+    with open(path+'league_dataset.csv',mode='w+') as ded:
         ded.truncate()
         ded.close()
 def getGuesses():
     try:
-        with open('guessImGuessing.csv',mode='r') as bGS:
+        with open(path+'guessImGuessing.csv',mode='r') as bGS:
             csv_reader = csv.reader(bGS, delimiter=',')
             line_count = 0
             global rightGuess
@@ -65,32 +94,37 @@ def getGuesses():
     except:
         writeGuesses()
 def writeGuesses():
-    with open('guessImGuessing.csv', mode='w') as GGS:
+    with open(path+'guessImGuessing.csv', mode='w') as GGS:
         writer = csv.writer(GGS)
         global rightGuess
         global wrongGuess
         writer.writerow([rightGuess])
         writer.writerow([wrongGuess])
 def getSettings():
+    global path
+    global model
     try:
-        with open('badGambleSetting.csv',mode='r') as bGS:
+        with open(path+'badGambleSetting.csv',mode='r') as bGS:
             csv_reader = csv.reader(bGS, delimiter=',')
             line_count = 0
-            global model
             for row in csv_reader:
                 if line_count == 0:
                     model = row[1]
+                if line_count ==1:
+                    path = row[1]
                 line_count += 1             
     except:
         writeSettings()
 def writeSettings():
     global model
-    with open('badGambleSetting.csv', mode='w') as bGS:
+    global path
+    with open(path+'badGambleSetting.csv', mode='w') as bGS:
         writer = csv.writer(bGS)
-        writer.writerow(['model', model])
+        writer.writerow(['model',model])
+        writer.writerow(['path',path])
 def getDatabase():
-    names = ['players Analyzed','Matches Analyzed','(K/D)A/2','Total Damage','CS at 10','Win']
-    return read_csv('league_dataset.csv',names=names)
+    names = ['Players Analyzed','Matches Analyzed','(K/D)A/2','Total Damage','CS at 10','Win']
+    return read_csv(path+'league_dataset.csv',names=names)
 def predictCurrentChampSelect(modelN = "LR"):
     global model
     if modelN == "LR":
@@ -161,7 +195,7 @@ def printModels():
     print("|SVM| -Support Vector Classification")
     
 def addToDataset(averageRow):
-    with open('league_dataset.csv',mode='a') as LD:
+    with open(path+'league_dataset.csv',mode='a') as LD:
         writer = csv.writer(LD)
         writer.writerow(averageRow)
         LD.close()
@@ -290,6 +324,24 @@ async def getChampSelect(connection):
             await getSummonerPuuIDS(connection,sumIDS)
         else:
             pass
+def importDataset():
+    combinedList = []
+    route = input("Path to file:")
+    with open(path+'league_dataset.csv',mode='r') as new:
+        csv_reader = csv.reader(new, delimiter=',')
+        for row in csv_reader:
+            combinedList.append(row)
+    try:
+        with open(route,mode='r') as old:
+            csv_reader = csv.reader(old, delimiter=',')
+            newAdditions = 0
+            for row in csv_reader:
+                if combinedList.count(row) == 0:
+                    newAdditions +=1
+                    combinedList.append(row)
+        print("Import Complete: "+str(newAdditions)+" new addition(s)")
+    except Exception as e:
+        print("error well importing: " + str(e))
 async def getEndGame(connection):
     end = await connection.request('get', '/lol-pre-end-of-game/v1/currentSequenceEvent')
     end = json.loads(await end.read())
@@ -339,23 +391,22 @@ async def getEndGame(connection):
 
 def printIntro():
     print("before anything make sure to fully read the README file that was included in the folder            ")
-    print("for this aplication to work have it run in the background to take test samples of live games       ")
+    print("for this application to work have it run in the background to take test samples of live games        ")
     print("this application will provide live guesses in champ select and have some database exploring options")
-    print("please note that machine learning programs up to a thousand of attempts to learn to walk efficently  ")
+    print("please note that machine learning programs up to a thousand of attempts to learn to walk efficiently   ")
 def printMenu():
     print("COMMANDS:")
-    print("|auto|- let the code do the stuffs and stop the interaction with the code")
+    print("|auto|- let the code do the stuff and stop the interaction with the code")
     print("|last guess|- shows the last update guess (0 = Lose) (1 = Win)")
     print("|last lobby|- shows the last update of lobby average (0,0,0,0 if no lobby entered since run)")
     print("|display guess| - will give you the amount of wrong and right + accuracy")
     print("|connection|- will tell you whether you are connected to league of legends")
     print("|display menu|- will print this menu")
-    print("|dataset wipe|- remove all entries in dataset(remember that machine learning get more precise with more games)")
-    print("|dataset length| - will see how many rows there are in the dataset")
-    print("|dataset view|- will print out the entrie dataset")
-    print("|test| - will run multiple models against your database as partialy a test set(need min 50 datasetLength)")
-    print("|manualy set model|(to a hopefully more accurate model after viewing(testMachineLearning)")
+    print("|dataset options|- print dataset options")
+    print("|test| - will run multiple models against your database as partialy a test set(need min 42 datasetLength)")
+    print("|manually set model|(to a hopefully more accurate model after viewing(testMachineLearning)")
     print("|display crappy intro| - lots of words removed from everytime you loaded this up")
+    print("|run at start| - adds it to the start up folder so you dont have to start it every time your computer boots")
     getAnswer()
     
 def setModel(modelN):
@@ -384,6 +435,12 @@ def getAnswer():
     answer = input("Command:")
     if answer == "display menu":
         printMenu()
+    elif answer == "dataset options":
+        print("|dataset wipe|- remove all entries in the dataset(remember that machine learning get more precise with more games)")
+        print("|dataset length| - will see how many rows there are in the dataset")
+        print("|dataset view|- will print out the entrie dataset")
+        print("|dataset import|- give the exact path to another csv dataset to add new games from")
+        getAnswer()
     elif answer == "connection":
         global connected
         if connected == True:
@@ -400,6 +457,9 @@ def getAnswer():
     elif answer == "dataset length":
         print(round(data.size/6))
         getAnswer()
+    elif answer == "dataset import":
+        importDataset()
+        getAnswer()
     elif answer == "dataset view":
         if data.size > 0:
             print(data)
@@ -408,7 +468,7 @@ def getAnswer():
         getAnswer()
     elif answer == "test":
         testMachineLearning()
-    elif answer == "manualy set model":
+    elif answer == "manually set model":
         printModels()
         model = input("MODEL:")
         setModel(model)
@@ -418,6 +478,9 @@ def getAnswer():
             datasetWipe()
         getAnswer()
         datasetWipe()
+    elif answer =="run at start":
+        addToStartup()
+        getAnswer()
     elif answer == "display crappy intro":
         printIntro()
         getAnswer()
@@ -439,13 +502,14 @@ def getAnswer():
     else:
         print("invalid Command")
         getAnswer()
-
+                
 def gui():
     print()
     print("-------------------------------------------------------------------------------------------")
     print("                             Welcome to the badGambler                                     ")
     print("-------------------------------------------------------------------------------------------")
     getSettings() #set some global variables
+    firstStart()
     getGuesses()
     printMenu()
 def backbone():
@@ -473,4 +537,3 @@ t1.start()
 t2.start()
 t1.join()
 t2.join()
-    
