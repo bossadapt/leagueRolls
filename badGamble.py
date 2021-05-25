@@ -234,7 +234,7 @@ async def getAverage(connection,summoner):
         try:
             print(match)
         except:
-            prtnt()
+            print()
     if matchesAnalyzed > 0:
         KDTotal = round(KDTotal/matchesAnalyzed,2)
         dmgTotal = round(dmgTotal/matchesAnalyzed,2)
